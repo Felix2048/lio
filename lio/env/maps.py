@@ -7,6 +7,7 @@
 # 'A' means apple spawn point
 # 'B' is potential apple spawn point
 # ' ' is empty space
+from social_dilemmas.maps import CLEANUP_MAP
 
 CLEANUP_10x10_SYM = [
     '@@@@@@@@@@',

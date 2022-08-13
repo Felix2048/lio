@@ -1,6 +1,6 @@
 """LIO with policy gradient for policy optimization."""
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 import lio.alg.networks
 import lio.utils.util

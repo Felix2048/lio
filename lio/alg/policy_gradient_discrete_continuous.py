@@ -1,7 +1,7 @@
 """Policy gradient with discrete and continuous actions."""
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from scipy.special import expit
 

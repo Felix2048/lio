@@ -1,6 +1,6 @@
 """LIO with actor-critic for policy optimization."""
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 import networks
 

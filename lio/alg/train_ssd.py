@@ -5,11 +5,12 @@ import random
 import time
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
-import lio.alg.config_ssd_lio
-import lio.alg.evaluate
-import lio.env.ssd
+from lio.alg import config_ssd_lio, evaluate
+from lio.env import ssd
+
+tf.compat.v1.disable_eager_execution()
 
 
 def train_function(config):

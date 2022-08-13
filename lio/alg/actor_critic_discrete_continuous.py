@@ -4,7 +4,7 @@ Advantage function is estimated by 1-step TD(0) error.
 """
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 from scipy.special import expit
 

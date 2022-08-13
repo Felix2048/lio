@@ -7,7 +7,7 @@ import random
 from copy import deepcopy
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 import lio.alg.config_room_lio
 import lio.alg.config_room_pg

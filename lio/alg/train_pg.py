@@ -15,7 +15,7 @@ import random
 import time
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 import lio.alg.config_room_pg
 import lio.alg.config_ssd_pg

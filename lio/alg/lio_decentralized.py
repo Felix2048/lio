@@ -4,7 +4,7 @@ Currently assumes N=2, to be run on 2-player Escape Room.
 """
 
 import numpy as np
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 import lio.alg.lio_agent
 import lio.alg.networks

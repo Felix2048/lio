@@ -1,7 +1,6 @@
 """Wrapper around Sequential Social Dilemma environment."""
 
 from lio.env import maps
-from social_dilemmas.constants import CLEANUP_MAP
 from social_dilemmas.envs.cleanup import CleanupEnv
 
 
@@ -51,7 +50,7 @@ class Env(object):
             ascii_map = maps.CLEANUP_10x10_SYM
 
         self.env = CleanupEnv(ascii_map=ascii_map,
-                              num_agents=self.n_agents, render=False,
+                              num_agents=self.n_agents,
                               shuffle_spawn=self.config.shuffle_spawn,
                               global_ref_point=self.config.global_ref_point,
                               view_size=self.config.view_size,
@@ -69,7 +68,7 @@ class Env(object):
 
     def process_obs(self, obs_dict):
 
-        return [obs/256.0 for obs in list(obs_dict.values())]
+        return [obs["curr_obs"] / 255. for obs in list(obs_dict.values())]
 
     def reset(self):
         """Resets the environemnt.
