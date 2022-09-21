@@ -8,15 +8,15 @@ import sys
 from multiprocessing import Process
 from copy import deepcopy
 
-import lio.alg.train_pg
-import lio.alg.train_lio
-import lio.alg.train_ssd
-import lio.alg.config_ipd_lio
-import lio.alg.config_room_lio
-import lio.alg.config_room_pg
-import lio.alg.config_ssd_lio
-import lio.alg.config_ssd_pg
-import lio.alg.config_ssd_lio_10_10
+# import lio.alg.train_pg
+# import lio.alg.train_lio
+from lio.alg import train_ssd
+# import lio.alg.config_ipd_lio
+# import lio.alg.config_room_lio
+# import lio.alg.config_room_pg
+# import lio.alg.config_ssd_pg
+from lio.alg import config_ssd_lio
+from lio.alg import config_ssd_lio_10_10
 
 parser = argparse.ArgumentParser()
 parser.add_argument('alg', type=str, choices=['lio', 'pg'],
@@ -38,17 +38,21 @@ if args.alg == 'lio':
         config = config_ssd_lio_10_10.get_config()
         train_function = train_ssd.train_function
     else:
-        if args.exp == 'er':
-            config = config_room_lio.get_config()
-        elif args.exp == 'ipd':
-            config = config_ipd_lio.get_config()
-        train_function = train_lio.train
+        # if args.exp == 'er':
+        #     config = config_room_lio.get_config()
+        # elif args.exp == 'ipd':
+        #     config = config_ipd_lio.get_config()
+        # train_function = train_lio.train
+        raise NotImplementedError('Unsupported env.')
 elif args.alg == 'pg':
-    if args.exp == 'ssd':
-        config = config_ssd_pg.get_config()
-    elif args.exp == 'er':
-        config = config_room_pg.get_config()
-    train_function = train_pg.train_function
+    raise NotImplementedError('Unsupported alg.')
+#     if args.exp == 'ssd':
+#         config = config_ssd_pg.get_config()
+#     elif args.exp == 'er':
+#         config = config_room_pg.get_config()
+#     train_function = train_pg.train_function
+else:
+    raise NotImplementedError('Unsupported alg.')
 
 n_seeds = args.n_seeds
 seed_min = args.seed_min

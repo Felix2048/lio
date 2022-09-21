@@ -56,7 +56,8 @@ class Env(object):
                               view_size=self.config.view_size,
                               random_orientation=self.config.random_orientation,
                               cleanup_params=self.config.cleanup_params,
-                              beam_width=self.config.beam_width)
+                              beam_width=self.config.beam_width,
+                              collect_n_cleaned_each_agent=True)
 
         # length of action input to learned reward function
         if self.config.obs_cleaned_1hot:

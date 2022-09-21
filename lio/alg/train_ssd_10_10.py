@@ -7,13 +7,13 @@ import time
 import numpy as np
 import tensorflow.compat.v1 as tf
 
-from lio.alg import config_ssd_lio, evaluate
+from lio.alg import config_ssd_lio_10_10, evaluate
 from lio.env import ssd
 
 tf.compat.v1.disable_eager_execution()
 
 
-def train_function(config, show_progress=False):
+def train_function(config):
 
     seed = config.main.seed
     np.random.seed(seed)
@@ -137,9 +137,6 @@ def train_function(config, show_progress=False):
     idx_episode = 0
     t_start = time.time()
     prev_reward_env = 0
-    if show_progress:
-        from tqdm.auto import tqdm
-        pbar = tqdm(total=n_episodes)
     while idx_episode < n_episodes:
 
         # print('idx_episode', idx_episode)
@@ -147,13 +144,6 @@ def train_function(config, show_progress=False):
                                    prime=False)
         step += len(list_buffers[0].obs)
         idx_episode += 1
-        if show_progress:
-            pbar.update(1)
-            reward_env_total = 0.
-            for buffer in list_buffers:
-                reward_env_total += sum(buffer.reward)
-            reward_env_total /= len(list_buffers)
-            pbar.set_postfix(sw='{:.4f}'.format(reward_env_total))
 
         # Standard learning step for all agents
         for idx, agent in enumerate(list_agents):
@@ -164,13 +154,6 @@ def train_function(config, show_progress=False):
                                        epsilon, prime=True)
         step += len(list_buffers_new[0].obs)
         idx_episode += 1
-        if show_progress:
-            pbar.update(1)
-            reward_env_total = 0.
-            for buffer in list_buffers_new:
-                reward_env_total += sum(buffer.reward)
-            reward_env_total /= len(list_buffers_new)
-            pbar.set_postfix(sw='{:.4f}'.format(reward_env_total))
 
         for agent in list_agents:
             if agent.can_give:
@@ -224,9 +207,6 @@ def train_function(config, show_progress=False):
 
         if config.lio.reg_coeff == 'linear':
             reg_coeff = min(1.0, reg_coeff + reg_coeff_step)
-        
-    if show_progress:
-        pbar.close()
 
     saver.save(sess, os.path.join(log_path, model_name))
 
@@ -329,5 +309,5 @@ class Buffer(object):
 
 if __name__ == '__main__':
 
-    config = config_ssd_lio.get_config()
-    train_function(config, show_progress=True)
+    config = config_ssd_lio_10_10.get_config()
+    train_function(config)
