@@ -5,7 +5,7 @@ Copyright (c) 2018 Maruan Al-Shedivat.
 import gym
 import numpy as np
 
-from gym.spaces import prng
+from lio.utils import prng
 
 
 class OneHot(gym.Space):
@@ -17,6 +17,7 @@ class OneHot(gym.Space):
 
     def sample(self):
         return prng.np_random.multinomial(1, [1. / self.n] * self.n)
+        random_array = np.random.RandomState().rand(self.num_discrete_space)
 
     def contains(self, x):
         return isinstance(x, np.ndarray) and \

@@ -9,9 +9,9 @@ from copy import deepcopy
 import numpy as np
 import tensorflow.compat.v1 as tf
 
-import lio.alg.config_room_lio
-import lio.alg.config_room_pg
-import lio.alg.evaluate
+from lio.alg import config_room_lio
+from lio.alg import config_room_pg
+from lio.alg import evaluate
 import lio.env.room_symmetric
 
 

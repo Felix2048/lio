@@ -8,13 +8,13 @@ import sys
 from multiprocessing import Process
 from copy import deepcopy
 
-# import lio.alg.train_pg
-# import lio.alg.train_lio
+# from lio.alg import train_pg
+# from lio.alg import train_lio
 from lio.alg import train_ssd
-# import lio.alg.config_ipd_lio
-# import lio.alg.config_room_lio
-# import lio.alg.config_room_pg
-# import lio.alg.config_ssd_pg
+# from lio.alg import config_ipd_lio
+# from lio.alg import config_room_lio
+# from lio.alg import config_room_pg
+# from lio.alg import config_ssd_pg
 from lio.alg import config_ssd_lio
 from lio.alg import config_ssd_lio_10_10
 

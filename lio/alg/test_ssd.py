@@ -7,10 +7,10 @@ import random
 import numpy as np
 import tensorflow.compat.v1 as tf
 
-import lio.alg.config_ssd_lio
-import lio.alg.config_ssd_pg
-import lio.alg.evaluate
-import lio.alg.policy_gradient
+from lio.alg import config_ssd_lio
+from lio.alg import config_ssd_pg
+from lio.alg import evaluate
+from lio.alg import policy_gradient
 import lio.env.ssd
 
 

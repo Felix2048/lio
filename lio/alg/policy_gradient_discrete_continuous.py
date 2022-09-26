@@ -5,8 +5,8 @@ import tensorflow.compat.v1 as tf
 
 from scipy.special import expit
 
-import lio.alg.networks
-import lio.alg.policy_gradient
+from lio.alg import networks
+from lio.alg import policy_gradient
 from lio.utils import util
 
 

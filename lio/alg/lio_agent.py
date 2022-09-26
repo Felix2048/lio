@@ -2,8 +2,8 @@
 import numpy as np
 import tensorflow.compat.v1 as tf
 
-import lio.alg.networks
-import lio.utils.util
+from lio.alg import networks
+from lio.utils import util
 
 
 class LIO(object):

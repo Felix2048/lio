@@ -17,9 +17,9 @@ import time
 import numpy as np
 import tensorflow.compat.v1 as tf
 
-import lio.alg.config_room_pg
-import lio.alg.config_ssd_pg
-import lio.alg.evaluate
+from lio.alg import config_room_pg
+from lio.alg import config_ssd_pg
+from lio.alg import evaluate
 
 
 def train_function(config):
@@ -65,14 +65,14 @@ def train_function(config):
     # ------------------ Initialize env----------------------#
     if config.env.name == 'er':
         if reward_type == 'continuous':
-            from env import room_symmetric
+            from lio.env import room_symmetric
             env = room_symmetric.Env(config.env)
         else:  # 'discrete' reward-giving actions or no reward
             if 'centralized' in config.pg and config.pg.centralized:
-                from env import room_symmetric_centralized as room
+                from lio.env import room_symmetric_centralized as room
                 env = room.EscapeRoom(config.env)
             else:
-                from env import room_symmetric_baseline as room
+                from lio.env import room_symmetric_baseline as room
                 allow_giving = (reward_type == 'discrete')
                 observe_given = (reward_type == 'discrete')
                 env = room.EscapeRoom(                
@@ -87,16 +87,16 @@ def train_function(config):
     elif config.env.name == 'ssd':
         if reward_type == 'none':
             if 'centralized' in config.pg and config.pg.centralized:
-                from env import ssd_centralized
+                from lio.env import ssd_centralized
                 env = ssd_centralized.Env(config.env)
             else:
-                from env import ssd
+                from lio.env import ssd
                 env = ssd.Env(config.env)
         elif reward_type == 'continuous':
-            from env import ssd_continuous_reward
+            from lio.env import ssd_continuous_reward
             env = ssd_continuous_reward.Env(config.env)
         else:
-            from env import ssd_discrete_reward
+            from lio.env import ssd_discrete_reward
             env = ssd_discrete_reward.Env(config.env)
         dim_obs = env.dim_obs
         l_action_for_r = env.l_action_for_r
