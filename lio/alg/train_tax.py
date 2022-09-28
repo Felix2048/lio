@@ -23,7 +23,7 @@ from lio.alg import config_room_tax
 from lio.alg import evaluate
 
 
-def train_function(config):
+def train_function(config, show_progress=False):
 
     seed = config.main.seed
     np.random.seed(seed)
@@ -111,6 +111,11 @@ def train_function(config):
     step = 0
     step_train = 0
     t_start = time.time()
+
+    if show_progress:
+        from tqdm.auto import tqdm
+        pbar = tqdm(total=n_episodes)
+
     for idx_episode in range(1, n_episodes + 1):
 
         list_buffers, tax_planner_buffer = run_episode(sess, env, list_agents, epsilon, reward_type)
@@ -121,6 +126,14 @@ def train_function(config):
         # train tax planner
         tax_planner.train(sess, tax_planner_buffer)
         step_train += 1
+
+        if show_progress:
+            pbar.update(1)
+            display_contents = {}
+            for agent_id in range(env.n_agents):
+                display_contents[f'A{agent_id + 1}'] = sum(list_buffers[agent_id].reward)
+            display_contents['SW'] = sum(tax_planner_buffer.tax_planner_reward)
+            pbar.set_postfix(**display_contents)
 
         if idx_episode % period == 0:
             # TODO: tax evaluation
@@ -139,6 +152,9 @@ def train_function(config):
 
         if epsilon > config.pg.epsilon_end:
             epsilon -= epsilon_step
+
+    if show_progress:
+        pbar.close()
 
     saver.save(sess, os.path.join(log_path, model_name))
     
@@ -211,16 +227,17 @@ class TaxPlannerBuffer(object):
         self.shaped_reward_sums = []
         self.infos = []
 
-    def _append_dict(self, buffer_dict, data):
-        if buffer_dict:
-            for k in data.keys():
-                buffer_dict[k] = np.concatenate((buffer_dict[k], data[k].reshape(1, -1)), axis=0)
-        else:
-            buffer_dict = {k: v.reshape(1, -1) for k, v in data.items()}
-
     def add(self, tax_planner_transition, infos=None):
-        self._append_dict(self.tax_planner_obs, tax_planner_transition[0])
-        self._append_dict(self.tax_planner_obs, tax_planner_transition[1])
+        if self.tax_planner_obs:
+            for k in tax_planner_transition[0].keys():
+                self.tax_planner_obs[k] = np.concatenate((self.tax_planner_obs[k], tax_planner_transition[0][k].reshape(1, -1)), axis=0)
+        else:
+            self.tax_planner_obs = {k: v.reshape(1, -1) for k, v in tax_planner_transition[0].items()}
+        if self.tax_planner_action:
+            for k in tax_planner_transition[1].keys():
+                self.tax_planner_action[k] = np.concatenate((self.tax_planner_action[k], tax_planner_transition[1][k].reshape(1, -1)), axis=0)
+        else:
+            self.tax_planner_action = {k: v.reshape(1, -1) for k, v in tax_planner_transition[1].items()}
         self.tax_planner_reward.append(tax_planner_transition[2])
         self.shaped_reward_sums.append(tax_planner_transition[3])
         if infos:
@@ -238,4 +255,5 @@ if __name__ == '__main__':
     else:
         raise NotImplementedError(f'Unsupported experiment {args.exp}')
 
-    train_function(config)
+    train_function(config, show_progress=True)
+

@@ -96,7 +96,7 @@ class TaxAgent(object):
 
     def train(self, sess, buf):
         obs_inputs = {self.obs[obs_name]: obs_input for obs_name, obs_input in buf.tax_planner_obs.items()}
-        action_inputs = {self.actions[action_name]: action_input for action_name, action_input in buf.tax_planner_action.items()}
+        # action_inputs = {self.tax_planner_actions[action_name]: action_input for action_name, action_input in buf.tax_planner_action.items()}
         n_steps = len(buf.tax_planner_reward)
         ones = np.ones(n_steps)
         tax_planner_reward = np.array(buf.tax_planner_reward).astype(np.float32)
@@ -104,7 +104,7 @@ class TaxAgent(object):
         action_mask[tax_planner_reward <= 0.] = 0.
         feed = {
             **obs_inputs,
-            **action_inputs,
+            # **action_inputs,
             self.r_ext: tax_planner_reward,
             self.action_mask: action_mask,
             self.ones: ones

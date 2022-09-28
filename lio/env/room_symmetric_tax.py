@@ -63,7 +63,6 @@ class EscapeRoom(gym.Env):
         if self.use_bank:
             self.tax_l_obs["bank"] = 1
             self.bank = 0.
-            self.shaped_reward_sum = 0.
         self.tax_planner = TaxAgent(configs, self.tax_l_obs, self.n_agents)
 
         self.actors = [Actor(idx, self.n_agents, self.l_obs)
@@ -141,7 +140,6 @@ class EscapeRoom(gym.Env):
 
         if self.use_bank:
             self.bank = 0.
-            self.shaped_reward_sum = 0.
 
         list_obs_next = self.get_obs()
         # tax_planner_obs_next = self.get_tax_planner_obs()
@@ -181,17 +179,16 @@ class EscapeRoom(gym.Env):
         """
         # compute tax and subsidy
         if self.use_bank:
-            rewards, self.bank, shaping, extra_infos = self.tax_planner.act(tax_planner_actions, rewards_env, bank=self.bank, with_extra_infos=self.with_extra_infos)
-            self.shaped_reward_sum += shaping.sum()
+            rewards, tax_planner_reward, self.bank, shaping, extra_infos = self.tax_planner.act(tax_planner_actions, rewards_env, bank=self.bank, with_extra_infos=self.with_extra_infos)
+            shaped_reward_sum = shaping.sum()
             if done:
                 # subsidy all the reward in the bank to all agents averagely
                 for i in range(len(rewards)):
-                    rewards[i] += self.bank / self.num_agents
+                    rewards[i] += self.bank / self.n_agents
         else:
-            rewards, _, _, extra_infos = self.tax_planner.act(tax_planner_actions, rewards_env, with_extra_infos=self.with_extra_infos)
+            rewards, tax_planner_reward, _, _, extra_infos = self.tax_planner.act(tax_planner_actions, rewards_env, with_extra_infos=self.with_extra_infos)
 
         if self.with_extra_infos:
             infos['extra_infos'] = extra_infos
         
-        tax_planner_reward = np.sum(rewards_env)
-        return rewards, tax_planner_reward, self.shaped_reward_sum, infos
+        return rewards, tax_planner_reward, shaped_reward_sum, infos
