@@ -16,6 +16,7 @@ import time
 
 import numpy as np
 import tensorflow.compat.v1 as tf
+tf.disable_eager_execution()
 
 from lio.env import room_symmetric_tax as room
 from lio.alg import config_room_tax
@@ -118,12 +119,12 @@ def train_function(config):
         for idx, agent in enumerate(list_agents):
             agent.train(sess, list_buffers[idx], epsilon)
         # train tax planner
-        tax_planner.train(tax_planner_buffer)
+        tax_planner.train(sess, tax_planner_buffer)
         step_train += 1
 
         if idx_episode % period == 0:
             # TODO: tax evaluation
-            (reward_total, n_lever, n_door, steps_per_episode) = evaluate.test_room_symmetric_baseline(n_eval, env, sess, list_agents)
+            (reward_total, n_lever, n_door, steps_per_episode) = evaluate.test_room_symmetric_tax_planner(n_eval, env, sess, list_agents)
             combined = np.stack([reward_total, n_lever, n_door])
             s = '%d,%d,%d' % (idx_episode, step_train, step)
             for idx in range(env.n_agents):
@@ -150,6 +151,7 @@ def run_episode(sess, env, list_agents, epsilon, reward_type):
                    agents have extra observation vector
     """
     tax_planner = env.tax_planner
+    tax_planner_buffer = TaxPlannerBuffer()
     list_buffers = [Buffer(env.n_agents) for _ in range(env.n_agents)]
     list_obs = env.reset()
     done = False
@@ -161,20 +163,20 @@ def run_episode(sess, env, list_agents, epsilon, reward_type):
             list_actions.append(action)
 
         list_obs_next, tax_planner_obs, rewards_env, done, infos = env.step(list_actions)
-        tax_planner_actions = tax_planner.run_actor(obs, sess)
+        tax_planner_obs = {obs_name: obs_input.reshape(1, -1) for obs_name, obs_input in tax_planner_obs.items()}
+        tax_planner_actions = tax_planner.run_actor(tax_planner_obs, sess)
         rewards, tax_planner_reward, shaped_reward_sum, infos = env.step_tax_planner(tax_planner_actions, rewards_env, done, infos)
 
         for idx, buf in enumerate(list_buffers):
-            transition = [list_obs[idx], list_actions[idx], env_rewards[idx]]
+            transition = [list_obs[idx], list_actions[idx], rewards[idx]]
             # transition.append(list_obs_next[idx])
-            # TODO: tax_planner_transition
-            buf.add(transition, tax_planner_transition, done)
-            if done:
-                buf.shaped_reward_sum = shaped_reward_sum
+            buf.add(transition, done)
+        tax_planner_transition = [tax_planner_obs, tax_planner_actions, tax_planner_reward, shaped_reward_sum]
+        tax_planner_buffer.add(tax_planner_transition, infos)
 
         list_obs = list_obs_next
 
-    return list_buffers
+    return list_buffers, tax_planner_buffer
 
 
 class Buffer(object):
@@ -189,38 +191,38 @@ class Buffer(object):
         self.reward = []
         # self.obs_next = []
         self.done = []
-        self.tax_planner_obs = []
-        self.tax_planner_action = []
-        self.tax_planner_reward = []
-        self.shaped_reward_sum = 0
 
-    def add(self, transition, tax_planner_transition, done):
+    def add(self, transition, done):
         self.obs.append(transition[0])
         self.action.append(transition[1])
         self.reward.append(transition[2])
         # self.obs_next.append(transition[3])
         self.done.append(done)
-        self.tax_planner_obs.append(tax_planner_transition[0])
-        self.tax_planner_action.append(tax_planner_transition[1])
-        self.tax_planner_reward.append(tax_planner_transition[2])
+
 
 class TaxPlannerBuffer(object):
-    # TODO: tax_planner_obs = {'curr_obs': np.array([batch, obs_dim]), ...}
-    def __init__(self, n_agents):
-        self.n_agents = n_agents
+    def __init__(self):
         self.reset()
 
     def reset(self):
-        self.tax_planner_obs = []
-        self.tax_planner_action = []
+        self.tax_planner_obs = {}
+        self.tax_planner_action = {}
         self.tax_planner_reward = []
+        self.shaped_reward_sums = []
         self.infos = []
-        self.shaped_reward_sum = 0
+
+    def _append_dict(self, buffer_dict, data):
+        if buffer_dict:
+            for k in data.keys():
+                buffer_dict[k] = np.concatenate((buffer_dict[k], data[k].reshape(1, -1)), axis=0)
+        else:
+            buffer_dict = {k: v.reshape(1, -1) for k, v in data.items()}
 
     def add(self, tax_planner_transition, infos=None):
-        self.tax_planner_obs.append(tax_planner_transition[0])
-        self.tax_planner_action.append(tax_planner_transition[1])
+        self._append_dict(self.tax_planner_obs, tax_planner_transition[0])
+        self._append_dict(self.tax_planner_obs, tax_planner_transition[1])
         self.tax_planner_reward.append(tax_planner_transition[2])
+        self.shaped_reward_sums.append(tax_planner_transition[3])
         if infos:
             self.infos.append(infos)
 

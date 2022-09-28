@@ -560,3 +560,57 @@ def test_ipd(n_eval, env, sess, list_agents):
 
     return (rewards_given, rewards_received, rewards_env,
             rewards_total)
+
+def test_room_symmetric_tax_planner(n_eval, env, sess, list_agents):
+    """Eval episodes.
+
+    Args:
+        n_eval: number of episodes to run
+        env: env object
+        sess: TF session
+        list_agents: list of agent objects
+    """
+    tax_planner = env.tax_planner
+    rewards_total = np.zeros(env.n_agents)
+    n_move_lever = np.zeros(env.n_agents)
+    n_move_door= np.zeros(env.n_agents)
+    total_steps = 0
+    epsilon = 0
+    for _ in range(1, n_eval + 1):
+
+        list_obs = env.reset()
+        done = False
+        while not done:
+            list_actions = []
+            for idx, agent in enumerate(list_agents):
+                action = agent.run_actor(list_obs[idx], sess, epsilon)
+                list_actions.append(action)
+                if action % 3 == 0:
+                    n_move_lever[idx] += 1
+                elif action % 3 == 2:
+                    n_move_door[idx] += 1
+
+
+            list_obs_next, tax_planner_obs, rewards_env, done, infos = env.step(list_actions)
+            tax_planner_obs = {obs_name: obs_input.reshape(1, -1) for obs_name, obs_input in tax_planner_obs.items()}
+            tax_planner_actions = tax_planner.run_actor(tax_planner_obs, sess)
+            rewards, tax_planner_reward, shaped_reward_sum, infos = env.step_tax_planner(tax_planner_actions, rewards_env, done, infos)
+
+            # When using discrete reward-giving actions,
+            # env_rewards may not account for the full cost, since
+            # we may have cost = reward_coeff * reward_value
+            # (see room_symmetric_baseline.py)
+            # The original env reward is recorded in info
+            # rewards_total += env_rewards
+            rewards_total += rewards
+            list_obs = list_obs_next
+
+        total_steps += env.steps
+
+    rewards_total /= n_eval
+    n_move_lever /= n_eval
+    n_move_door /= n_eval
+    steps_per_episode = total_steps / n_eval
+
+    return (rewards_total, n_move_lever, n_move_door, 
+            steps_per_episode)
