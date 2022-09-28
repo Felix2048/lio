@@ -92,7 +92,7 @@ def train_function(config, show_progress=False):
 
     list_agent_meas = []
     if config.env.name == 'er':
-        list_suffix = ['reward_total', 'n_lever', 'n_door']
+        list_suffix = ['reward_total', 'extrinsic_reward', 'n_lever', 'n_door', 'taxed', 'subsidied', 'externality']
    
     for agent_id in range(1, env.n_agents + 1):
         for suffix in list_suffix:
@@ -103,7 +103,7 @@ def train_function(config, show_progress=False):
     header = 'episode,step_train,step,'
     header += ','.join(list_agent_meas)
     if config.env.name == 'er':
-        header += ',steps_per_eps\n'
+        header += ',steps_per_eps,social_welfare\n'
 
     with open(os.path.join(log_path, 'log.csv'), 'w') as f:
         f.write(header)
@@ -126,23 +126,26 @@ def train_function(config, show_progress=False):
         # train tax planner
         tax_planner.train(sess, tax_planner_buffer)
         step_train += 1
+        social_welfare = sum(tax_planner_buffer.tax_planner_reward)
+        if social_welfare > 8:
+            import pdb; pdb.set_trace()
 
         if show_progress:
             pbar.update(1)
             display_contents = {}
             for agent_id in range(env.n_agents):
                 display_contents[f'A{agent_id + 1}'] = sum(list_buffers[agent_id].reward)
-            display_contents['SW'] = sum(tax_planner_buffer.tax_planner_reward)
+            display_contents['SW'] = '{:.4f}'.format(social_welfare)
             pbar.set_postfix(**display_contents)
 
         if idx_episode % period == 0:
-            # TODO: tax evaluation
-            (reward_total, n_lever, n_door, steps_per_episode) = evaluate.test_room_symmetric_tax_planner(n_eval, env, sess, list_agents)
-            combined = np.stack([reward_total, n_lever, n_door])
+            (reward_total, extrinsic_rewards, n_lever, n_door, steps_per_episode, taxed, subsidied, externality, social_welfare) = evaluate.test_room_symmetric_tax_planner(n_eval, env, sess, list_agents)
+            combined = np.stack([reward_total, extrinsic_rewards, n_lever, n_door, taxed, subsidied, externality])
             s = '%d,%d,%d' % (idx_episode, step_train, step)
             for idx in range(env.n_agents):
-                s += ',{:.3e},{:.3e},{:.3e}'.format(*combined[:, idx])
-            s += ',%.2f\n' % steps_per_episode
+                s += ',{:.3e},{:.3e},{:.3e},{:.3e},{:.3e},{:.3e},{:.3e}'.format(*combined[:, idx])
+            s += ',%.2f' % steps_per_episode
+            s += ',%.4f\n' % social_welfare
             with open(os.path.join(log_path, 'log.csv'), 'a') as f:
                 f.write(s)
 
@@ -184,7 +187,7 @@ def run_episode(sess, env, list_agents, epsilon, reward_type):
         rewards, tax_planner_reward, shaped_reward_sum, infos = env.step_tax_planner(tax_planner_actions, rewards_env, done, infos)
 
         for idx, buf in enumerate(list_buffers):
-            transition = [list_obs[idx], list_actions[idx], rewards[idx]]
+            transition = [list_obs[idx], list_actions[idx], rewards[idx], rewards_env[idx]]
             # transition.append(list_obs_next[idx])
             buf.add(transition, done)
         tax_planner_transition = [tax_planner_obs, tax_planner_actions, tax_planner_reward, shaped_reward_sum]
@@ -205,6 +208,7 @@ class Buffer(object):
         self.obs = []
         self.action = []
         self.reward = []
+        self.extrinsic_reward = []
         # self.obs_next = []
         self.done = []
 
@@ -212,7 +216,8 @@ class Buffer(object):
         self.obs.append(transition[0])
         self.action.append(transition[1])
         self.reward.append(transition[2])
-        # self.obs_next.append(transition[3])
+        self.extrinsic_reward.append(transition[3])
+        # self.obs_next.append(transition[4])
         self.done.append(done)
 
 

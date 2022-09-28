@@ -138,9 +138,9 @@ class EscapeRoom(gym.Env):
 
     def reset(self):
         self.solved = False
-        randomize = (self.n_agents == 3)
+        # randomize = (self.n_agents == 3)
         for actor in self.actors:
-            actor.reset(randomize)
+            actor.reset()
         self.state = [actor.position for actor in self.actors]
         self.steps = 0
         list_obs = self.get_obs()

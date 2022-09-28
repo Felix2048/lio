@@ -152,7 +152,6 @@ def train_function(config, show_progress=False):
             reward_env_total = 0.
             for buffer in list_buffers:
                 reward_env_total += sum(buffer.reward)
-            reward_env_total /= len(list_buffers)
             pbar.set_postfix(sw='{:.4f}'.format(reward_env_total))
 
         # Standard learning step for all agents
@@ -169,7 +168,6 @@ def train_function(config, show_progress=False):
             reward_env_total = 0.
             for buffer in list_buffers_new:
                 reward_env_total += sum(buffer.reward)
-            reward_env_total /= len(list_buffers_new)
             pbar.set_postfix(sw='{:.4f}'.format(reward_env_total))
 
         for agent in list_agents:

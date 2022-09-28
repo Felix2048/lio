@@ -572,8 +572,13 @@ def test_room_symmetric_tax_planner(n_eval, env, sess, list_agents):
     """
     tax_planner = env.tax_planner
     rewards_total = np.zeros(env.n_agents)
+    extrinsic_rewards = np.zeros(env.n_agents)
     n_move_lever = np.zeros(env.n_agents)
-    n_move_door= np.zeros(env.n_agents)
+    n_move_door = np.zeros(env.n_agents)
+    taxed = np.zeros(env.n_agents)
+    subsidied = np.zeros(env.n_agents)
+    externality = np.zeros(env.n_agents)
+    social_welfare = 0
     total_steps = 0
     epsilon = 0
     for _ in range(1, n_eval + 1):
@@ -596,6 +601,11 @@ def test_room_symmetric_tax_planner(n_eval, env, sess, list_agents):
             tax_planner_actions = tax_planner.run_actor(tax_planner_obs, sess)
             rewards, tax_planner_reward, shaped_reward_sum, infos = env.step_tax_planner(tax_planner_actions, rewards_env, done, infos)
 
+            if env.with_extra_infos:
+                taxed += infos['extra_infos']['tax']
+                subsidied += infos['extra_infos']['subsidy']
+                externality += infos['extra_infos']['shaping']
+
             # When using discrete reward-giving actions,
             # env_rewards may not account for the full cost, since
             # we may have cost = reward_coeff * reward_value
@@ -603,6 +613,8 @@ def test_room_symmetric_tax_planner(n_eval, env, sess, list_agents):
             # The original env reward is recorded in info
             # rewards_total += env_rewards
             rewards_total += rewards
+            extrinsic_rewards += rewards_env
+            social_welfare += tax_planner_reward
             list_obs = list_obs_next
 
         total_steps += env.steps
@@ -610,7 +622,11 @@ def test_room_symmetric_tax_planner(n_eval, env, sess, list_agents):
     rewards_total /= n_eval
     n_move_lever /= n_eval
     n_move_door /= n_eval
+    extrinsic_rewards /= n_eval
+    taxed /= n_eval
+    subsidied /= n_eval
+    externality /= n_eval
+    social_welfare /= n_eval
     steps_per_episode = total_steps / n_eval
 
-    return (rewards_total, n_move_lever, n_move_door, 
-            steps_per_episode)
+    return (rewards_total, extrinsic_rewards, n_move_lever, n_move_door, steps_per_episode, taxed, subsidied, externality, social_welfare)

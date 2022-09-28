@@ -11,15 +11,17 @@ from copy import deepcopy
 from lio.alg import train_pg
 from lio.alg import train_lio
 from lio.alg import train_ssd
+from lio.alg import train_tax
 from lio.alg import config_ipd_lio
 from lio.alg import config_room_lio
 from lio.alg import config_room_pg
 from lio.alg import config_ssd_lio
 from lio.alg import config_ssd_pg
 from lio.alg import config_ssd_lio_10_10
+from lio.alg import config_room_tax
 
 parser = argparse.ArgumentParser()
-parser.add_argument('alg', type=str, choices=['lio', 'pg'],
+parser.add_argument('alg', type=str, choices=['lio', 'pg', 'tax'],
                     default='lio')
 parser.add_argument('exp', type=str, choices=['er', 'ipd', 'ssd', 'ssd_10_10'],
                     default='er')
@@ -49,6 +51,12 @@ elif args.alg == 'pg':
     elif args.exp == 'er':
         config = config_room_pg.get_config()
     train_function = train_pg.train_function
+elif args.alg == 'tax':
+    if args.exp == 'er':
+        config = config_room_tax.get_config()
+    else:
+        raise NotImplementedError(f'Unsupported exp {args.exp}.')
+    train_function = train_tax.train_function
 
 n_seeds = args.n_seeds
 seed_min = args.seed_min

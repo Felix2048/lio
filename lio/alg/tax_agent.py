@@ -16,7 +16,6 @@ class TaxAgent(object):
         self.gamma = configs.pg.gamma
         self.lr_actor = configs.pg.lr_actor
         self.use_bank = configs.tax.use_bank
-        self.use_hardmax = configs.tax.use_hardmax
         self.loss_penalty_term_weight = configs.tax.loss_penalty_term_weight
         self.max_deficit = configs.tax.max_deficit
         self.budget_ratio_scale = configs.tax.budget_ratio_scale
@@ -44,7 +43,7 @@ class TaxAgent(object):
                                             use_bias=True,
                                             name='tax')(feature_vector)
                 self.subsidy_out = tf.keras.layers.Dense(units=self.l_action,
-                                            activation=tf.nn.hardmax if self.use_hardmax else tf.nn.softmax,
+                                            activation=tf.nn.softmax,
                                             use_bias=True,
                                             name='subsidy')(feature_vector)
                 self.tax_planner_actions = {
@@ -85,8 +84,8 @@ class TaxAgent(object):
 
         self.loss = self.policy_loss
         if self.use_bank:
-            self.shaped_reward_sum = tf.placeholder(tf.float32, [None], 'shaped_reward_sum')
-            self.loss_penalty_term = tf.abs(tf.reduce_sum(tf.multiply(self.log_pi_a_s, returns)))
+            self.shaped_reward_sums = tf.placeholder(tf.float32, [None], 'shaped_reward_sums')
+            self.loss_penalty_term = tf.abs(tf.reduce_sum(tf.multiply(self.log_pi_a_s, self.shaped_reward_sums)))
             self.loss += self.loss_penalty_term_weight * self.loss_penalty_term
 
         self.policy_grads = tf.gradients(self.loss, self.policy_params)
@@ -110,7 +109,7 @@ class TaxAgent(object):
             self.ones: ones
         }
         if self.use_bank:
-            feed[self.shaped_reward_sum]: np.array(buf.shaped_reward_sum).astype(np.float32)
+            feed[self.shaped_reward_sums] = np.array(buf.shaped_reward_sums).astype(np.float32)
 
         _ = sess.run(self.policy_op, feed_dict=feed)
 

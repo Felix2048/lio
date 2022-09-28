@@ -132,9 +132,9 @@ class EscapeRoom(gym.Env):
 
     def reset(self):
         self.solved = False
-        randomize = (self.n_agents == 3)
+        # randomize = (self.n_agents == 3)
         for actor in self.actors:
-            actor.reset(randomize)
+            actor.reset()
         self.state = [actor.position for actor in self.actors]
         self.steps = 0
 
@@ -190,5 +190,5 @@ class EscapeRoom(gym.Env):
 
         if self.with_extra_infos:
             infos['extra_infos'] = extra_infos
-        
+
         return rewards, tax_planner_reward, shaped_reward_sum, infos
