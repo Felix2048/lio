@@ -68,7 +68,7 @@ class TaxAgent(object):
 
     def create_policy_gradient_op(self):
         self.r_ext = tf.placeholder(tf.float32, [None], 'r_ext')
-        self.action_mask = tf.placeholder(tf.float32, [None], 'action_mask')
+        self.action_mask = tf.placeholder(tf.float32, [None, self.l_action], 'action_mask')
         self.ones = tf.placeholder(tf.float32, [None], 'ones')
         self.gamma_prod = tf.math.cumprod(self.ones * self.gamma)
         returns = tf.reverse(tf.math.cumsum(
@@ -96,11 +96,12 @@ class TaxAgent(object):
     def train(self, sess, buf):
         obs_inputs = {self.obs[obs_name]: obs_input for obs_name, obs_input in buf.tax_planner_obs.items()}
         # action_inputs = {self.tax_planner_actions[action_name]: action_input for action_name, action_input in buf.tax_planner_action.items()}
-        n_steps = len(buf.tax_planner_reward)
+        n_steps = buf.n_steps
         ones = np.ones(n_steps)
         tax_planner_reward = np.array(buf.tax_planner_reward).astype(np.float32)
-        action_mask = np.ones_like(buf.tax_planner_reward).astype(np.float32)
-        action_mask[tax_planner_reward <= 0.] = 0.
+        agent_rewards = np.array(buf.agent_rewards).astype(np.float32)
+        action_mask = np.ones_like(buf.agent_rewards).astype(np.float32)
+        action_mask[agent_rewards <= 0.] = 0.
         feed = {
             **obs_inputs,
             # **action_inputs,

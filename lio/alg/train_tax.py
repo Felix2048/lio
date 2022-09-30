@@ -188,7 +188,7 @@ def run_episode(sess, env, list_agents, epsilon, reward_type):
             transition = [list_obs[idx], list_actions[idx], rewards[idx], rewards_env[idx]]
             # transition.append(list_obs_next[idx])
             buf.add(transition, done)
-        tax_planner_transition = [tax_planner_obs, tax_planner_actions, tax_planner_reward, shaped_reward_sum]
+        tax_planner_transition = [tax_planner_obs, tax_planner_actions, tax_planner_reward, shaped_reward_sum, rewards_env]
         tax_planner_buffer.add(tax_planner_transition, infos)
 
         list_obs = list_obs_next
@@ -228,9 +228,12 @@ class TaxPlannerBuffer(object):
         self.tax_planner_action = {}
         self.tax_planner_reward = []
         self.shaped_reward_sums = []
+        self.agent_rewards = []
         self.infos = []
+        self.n_steps = 0
 
     def add(self, tax_planner_transition, infos=None):
+        self.n_steps += 1
         if self.tax_planner_obs:
             for k in tax_planner_transition[0].keys():
                 self.tax_planner_obs[k] = np.concatenate((self.tax_planner_obs[k], tax_planner_transition[0][k].reshape(1, -1)), axis=0)
@@ -243,6 +246,7 @@ class TaxPlannerBuffer(object):
             self.tax_planner_action = {k: v.reshape(1, -1) for k, v in tax_planner_transition[1].items()}
         self.tax_planner_reward.append(tax_planner_transition[2])
         self.shaped_reward_sums.append(tax_planner_transition[3])
+        self.agent_rewards.append(tax_planner_transition[4])
         if infos:
             self.infos.append(infos)
 
