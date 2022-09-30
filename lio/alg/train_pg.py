@@ -17,7 +17,7 @@ import time
 import numpy as np
 import tensorflow.compat.v1 as tf
 
-from lio.alg import config_room_pg
+# from lio.alg import config_room_pg
 from lio.alg import config_ssd_pg
 from lio.alg import evaluate
 
@@ -405,10 +405,25 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('exp', type=str,
                         choices=['er', 'ssd'])
+    parser.add_argument('n_agent', type=int, default=2)
+    parser.add_argument('type', type=str,
+                        choices=['none', 'discrete', 'continuous'], default='none')
     args = parser.parse_args()    
 
     if args.exp == 'er':
-        config = config_room_pg.get_config()
+        if args.n_agent == 2 and args.type == 'none':
+            from lio.alg.er_configs import config_room_pg_n2 as config_room
+        elif args.n_agent == 2 and args.type == 'discrete':
+            from lio.alg.er_configs import config_room_pg_n2_discrete as config_room
+        elif args.n_agent == 2 and args.type == 'discrete':
+            from lio.alg.er_configs import config_room_pg_n2_continuous as config_room
+        elif args.n_agent == 3 and args.type == 'discrete':
+            from lio.alg.er_configs import config_room_pg_n3 as config_room
+        elif args.n_agent == 3 and args.type == 'discrete':
+            from lio.alg.er_configs import config_room_pg_n3_discrete as config_room
+        elif args.n_agent == 3 and args.type == 'discrete':
+            from lio.alg.er_configs import config_room_pg_n3_continuous as config_room
+        config = config_room.get_config()
     elif args.exp == 'ssd':
         config = config_ssd_pg.get_config()
 

@@ -127,8 +127,6 @@ def train_function(config, show_progress=False):
         tax_planner.train(sess, tax_planner_buffer)
         step_train += 1
         social_welfare = sum(tax_planner_buffer.tax_planner_reward)
-        if social_welfare > 8:
-            import pdb; pdb.set_trace()
 
         if show_progress:
             pbar.update(1)

@@ -140,7 +140,7 @@ def test_room_symmetric_baseline(n_eval, env, sess, list_agents):
     epsilon = 0
     for _ in range(1, n_eval + 1):
 
-        list_obs = env.reset()
+        list_obs = env.reset(tested=True)
         done = False
         while not done:
             list_actions = []
@@ -583,7 +583,7 @@ def test_room_symmetric_tax_planner(n_eval, env, sess, list_agents):
     epsilon = 0
     for _ in range(1, n_eval + 1):
 
-        list_obs = env.reset()
+        list_obs = env.reset(tested=True)
         done = False
         while not done:
             list_actions = []
