@@ -9,11 +9,13 @@ import numpy as np
 # Map from name of map to the largest column position
 # where a cleaning beam fired from that position can clear waste
 cleanup_map_river_boundary = {'cleanup_small_sym': 2,
-                              'cleanup_10x10_sym': 3}
+                              'cleanup_10x10_sym': 3,
+                              'cleanup_map': 7}
 
 
 cleanup_map_middle = {'cleanup_small_sym': 3,
-                      'cleanup_10x10_sym': 4}
+                      'cleanup_10x10_sym': 4,
+                      'cleanup_map': 8}
 
 
 class A1(object):

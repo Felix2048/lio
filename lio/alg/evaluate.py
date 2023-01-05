@@ -11,7 +11,8 @@ from lio.alg import scripted_agents
 # Map from name of map to the largest column position
 # where a cleaning beam fired from that position can clear waste
 cleanup_map_river_boundary = {'cleanup_small_sym': 2,
-                              'cleanup_10x10_sym': 3}
+                              'cleanup_10x10_sym': 3,
+                              'cleanup_map': 7}
 
 
 def test_room_symmetric(n_eval, env, sess, list_agents,
