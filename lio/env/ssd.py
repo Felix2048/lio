@@ -15,6 +15,9 @@ class Env(object):
         self.max_steps = self.config.max_steps
         
         self.cleaning_penalty = self.config.cleaning_penalty
+
+        self.n_agents = self.config.n_agents
+
         # Original space (not necessarily in this order, see
         # the original ssd files):
         # no-op, up, down, left, right, turn-ccw, turn-cw, penalty, clean
@@ -35,19 +38,24 @@ class Env(object):
             # left, right, up, down, no-op, clean
             self.map_to_orig = {0:0, 1:1, 2:2, 3:3, 4:4, 5:8}
         else:  # full action space except penalty beam
-            self.l_action = 8
-            self.cleaning_action_idx = 7
-            # Don't allow penalty beam
-            self.map_to_orig = {0:0, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:8}
+            if 'enable_penalty_beam' in self.config and self.config.enable_penalty_beam:
+                self.l_action = 9
+                self.cleaning_action_idx = 8
+                self.map_to_orig = {0:0, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8}
+            else:
+                self.l_action = 8
+                self.cleaning_action_idx = 7
+                # Don't allow penalty beam
+                self.map_to_orig = {0:0, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:8}
 
         self.obs_cleaned_1hot = self.config.obs_cleaned_1hot
-
-        self.n_agents = self.config.n_agents
 
         if self.config.map_name == 'cleanup_small_sym':
             ascii_map = maps.CLEANUP_SMALL_SYM
         elif self.config.map_name == 'cleanup_10x10_sym':
             ascii_map = maps.CLEANUP_10x10_SYM
+        elif self.config.map_name == 'cleanup_map':
+            ascii_map = maps.CLEANUP_MAP
 
         self.env = CleanupEnv(ascii_map=ascii_map,
                               num_agents=self.n_agents,
