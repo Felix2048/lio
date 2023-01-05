@@ -15,7 +15,7 @@ def get_config():
     config.env.beam_width = 3  # default 3
     config.env.cleaning_penalty = 0.0
     config.env.disable_left_right_action = False
-    config.env.disable_rotation_action = True
+    config.env.disable_rotation_action = False
     # if not None, a fixed global reference frame is used for all agents
     # config.env.global_ref_point = [4, 4]  # cleanup_10x10
     # config.env.global_ref_point = [3, 3]  # for cleanup_small
@@ -71,8 +71,8 @@ def get_config():
     config.lio.use_actor_critic = True
 
     config.main = ConfigDict()
-    config.main.dir_name = 'small_n2_lio_no_rotation_2'
-    config.main.exp_name = 'small_n2_lio_no_rotation_2'
+    config.main.dir_name = 'small_n2_lio'
+    config.main.exp_name = 'cleanup'
     config.main.max_to_keep = 12
     config.main.model_name = 'model.ckpt'
     config.main.save_period = 100000

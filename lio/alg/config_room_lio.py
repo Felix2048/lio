@@ -14,8 +14,8 @@ def get_config():
 
     config.env = configdict.ConfigDict()
     config.env.max_steps = 5
-    config.env.min_at_lever = 1
-    config.env.n_agents = 2
+    config.env.min_at_lever = 2
+    config.env.n_agents = 3
     config.env.name = 'er'
     config.env.r_multiplier = 2.0
     config.env.randomize = False
@@ -23,10 +23,10 @@ def get_config():
 
     config.lio = configdict.ConfigDict()
     config.lio.asymmetric = False
-    config.lio.decentralized = False
+    config.lio.decentralized = True
     config.lio.entropy_coeff = 0.01
     config.lio.epsilon_div = 1000
-    config.lio.epsilon_end = 0.1
+    config.lio.epsilon_end = 0.3
     config.lio.epsilon_start = 0.5
     config.lio.gamma = 0.99
     config.lio.include_cost_in_chain_rule = False
@@ -43,8 +43,8 @@ def get_config():
     config.lio.use_actor_critic = False
 
     config.main = configdict.ConfigDict()
-    config.main.dir_name = 'er_n2_lio'
-    config.main.exp_name = 'er'
+    config.main.dir_name = 'er_n3_lio_decentralized_cnt_1'
+    config.main.exp_name = 'er_n3_lio_decentralized_1'
     config.main.max_to_keep = 100
     config.main.model_name = 'model.ckpt'
     config.main.save_period = 100000

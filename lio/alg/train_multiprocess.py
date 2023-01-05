@@ -18,12 +18,14 @@ from lio.alg import config_room_pg
 from lio.alg import config_ssd_lio
 from lio.alg import config_ssd_pg
 from lio.alg import config_ssd_lio_10_10
+from lio.alg import config_ssd_pg_10_10
+from lio.alg import config_ssd_lio_n5
 from lio.alg import config_room_tax
 
 parser = argparse.ArgumentParser()
 parser.add_argument('alg', type=str, choices=['lio', 'pg', 'tax'],
                     default='lio')
-parser.add_argument('exp', type=str, choices=['er', 'ipd', 'ssd', 'ssd_10_10'],
+parser.add_argument('exp', type=str, choices=['er', 'ipd', 'ssd', 'ssd_10_10', 'ssd_large'],
                     default='er')
 parser.add_argument('--seed_min', type=int, default=12340)
 parser.add_argument('--seed_base', type=int, default=12340)
@@ -39,6 +41,9 @@ if args.alg == 'lio':
     elif args.exp == 'ssd_10_10':
         config = config_ssd_lio_10_10.get_config()
         train_function = train_ssd.train_function
+    elif args.exp == 'ssd_large':
+        config = config_ssd_lio_large.get_config()
+        train_function = train_ssd.train_function
     else:
         if args.exp == 'er':
             config = config_room_lio.get_config()
@@ -48,6 +53,8 @@ if args.alg == 'lio':
 elif args.alg == 'pg':
     if args.exp == 'ssd':
         config = config_ssd_pg.get_config()
+    if args.exp == 'ssd_10_10':
+        config = config_ssd_pg_10_10.get_config()
     elif args.exp == 'er':
         config = config_room_pg.get_config()
     train_function = train_pg.train_function

@@ -70,8 +70,8 @@ def get_config():
     config.pg.use_actor_critic = True
 
     config.main = ConfigDict()
-    config.main.dir_name = 'small_n2_ac_discrete_1'
-    config.main.exp_name = 'small_n2_ac_discrete_1'
+    config.main.dir_name = 'small_n2_ac_discrete'
+    config.main.exp_name = 'small_n2_ac_discrete'
     config.main.max_to_keep = 10
     config.main.model_name = 'model.ckpt'
     config.main.save_period = 1000000

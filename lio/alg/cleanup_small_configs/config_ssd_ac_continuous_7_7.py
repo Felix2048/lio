@@ -65,13 +65,13 @@ def get_config():
     config.pg.gamma = 0.99
     config.pg.lr_actor = 1e-4
     config.pg.lr_v = 1e-3
-    config.pg.reward_type = 'discrete'
+    config.pg.reward_type = 'continuous'
     config.pg.tau = 0.01
     config.pg.use_actor_critic = True
 
     config.main = ConfigDict()
-    config.main.dir_name = 'small_n2_ac_discrete_1'
-    config.main.exp_name = 'small_n2_ac_discrete_1'
+    config.main.dir_name = 'small_n2_ac_continuous'
+    config.main.exp_name = 'small_n2_ac_continuous'
     config.main.max_to_keep = 10
     config.main.model_name = 'model.ckpt'
     config.main.save_period = 1000000

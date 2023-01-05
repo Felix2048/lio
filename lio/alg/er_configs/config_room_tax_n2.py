@@ -20,8 +20,8 @@ def get_config():
 
     config.env = ConfigDict()
     config.env.max_steps = 5
-    config.env.min_at_lever = 2
-    config.env.n_agents = 3
+    config.env.min_at_lever = 1
+    config.env.n_agents = 2
     config.env.name = 'er'
     config.env.r_multiplier = 2.0
     config.env.randomize = False
@@ -29,9 +29,6 @@ def get_config():
     config.env.reward_coeff = 1e-4
     config.env.reward_value = 2.0
 
-    config.ia = ConfigDict()
-    config.ia.enable = False
-    
     config.pg = ConfigDict()
     config.pg.asymmetric = False
     config.pg.centralized = False
@@ -41,13 +38,23 @@ def get_config():
     config.pg.epsilon_start = 0.5
     config.pg.gamma = 0.99
     config.pg.idx_recipient = 0
-    config.pg.lr_actor = 1e-4
+    config.pg.lr_actor = 1e-3
     config.pg.reward_type = 'none'  # 'none', 'discrete', 'continuous'
     config.pg.use_actor_critic = False
 
+    config.tax = ConfigDict()
+    config.tax.use_tax = True
+    config.tax.use_bank = True
+    config.tax.max_deficit = 0
+    config.tax.budget_ratio_scale = 1.0
+    config.tax.return_agent_actions = True
+    config.tax.return_agent_rewards = True
+    config.tax.loss_penalty_term_weight = 0.95
+    config.tax.with_extra_infos = True
+
     config.main = ConfigDict()
-    config.main.dir_name = 'er_n3_pg_cont_1'
-    config.main.exp_name = 'er_n3_pg_1'
+    config.main.dir_name = 'er_n2_tax_cont'
+    config.main.exp_name = 'er_n2_tax'
     config.main.max_to_keep = 100
     config.main.model_name = 'model.ckpt'
     config.main.save_period = 100000

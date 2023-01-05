@@ -63,15 +63,15 @@ def get_config():
     config.pg.epsilon_end = 0.05
     config.pg.epsilon_start = 0.5
     config.pg.gamma = 0.99
-    config.pg.lr_actor = 1e-4
+    config.pg.lr_actor = 1e-3
     config.pg.lr_v = 1e-3
-    config.pg.reward_type = 'discrete'
+    config.pg.reward_type = 'none'
     config.pg.tau = 0.01
     config.pg.use_actor_critic = True
 
     config.main = ConfigDict()
-    config.main.dir_name = 'small_n2_ac_discrete_1'
-    config.main.exp_name = 'small_n2_ac_discrete_1'
+    config.main.dir_name = 'small_n2_ac'
+    config.main.exp_name = 'small_n2_ac'
     config.main.max_to_keep = 10
     config.main.model_name = 'model.ckpt'
     config.main.save_period = 1000000
