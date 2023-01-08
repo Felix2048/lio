@@ -12,6 +12,7 @@ from lio.alg import train_pg
 from lio.alg import train_lio
 from lio.alg import train_ssd
 from lio.alg import train_tax
+from lio.alg import train_tax_only
 from lio.alg import config_ipd_lio
 from lio.alg import config_room_lio
 from lio.alg import config_room_pg
@@ -21,9 +22,10 @@ from lio.alg import config_ssd_lio_10_10
 from lio.alg import config_ssd_pg_10_10
 from lio.alg import config_ssd_lio_n5
 from lio.alg import config_room_tax
+from lio.alg import config_room_tax_only
 
 parser = argparse.ArgumentParser()
-parser.add_argument('alg', type=str, choices=['lio', 'pg', 'tax'],
+parser.add_argument('alg', type=str, choices=['lio', 'pg', 'tax', 'tax_only'],
                     default='lio')
 parser.add_argument('exp', type=str, choices=['er', 'ipd', 'ssd', 'ssd_10_10', 'ssd_large'],
                     default='er')
@@ -64,6 +66,13 @@ elif args.alg == 'tax':
     else:
         raise NotImplementedError(f'Unsupported exp {args.exp}.')
     train_function = train_tax.train_function
+elif args.alg == 'tax_only':
+    if args.exp == 'er':
+        config = config_room_tax_only.get_config()
+    else:
+        raise NotImplementedError(f'Unsupported exp {args.exp}.')
+    train_function = train_tax_only.train_function
+
 
 n_seeds = args.n_seeds
 seed_min = args.seed_min
