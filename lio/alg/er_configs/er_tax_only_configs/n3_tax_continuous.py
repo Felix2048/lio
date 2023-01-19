@@ -20,8 +20,8 @@ def get_config():
 
     config.env = ConfigDict()
     config.env.max_steps = 5
-    config.env.min_at_lever = 1
-    config.env.n_agents = 2
+    config.env.min_at_lever = 2
+    config.env.n_agents = 3
     config.env.name = 'er'
     config.env.r_multiplier = 2.0
     config.env.randomize = False
@@ -46,8 +46,7 @@ def get_config():
     config.tax.use_tax = True
     config.tax.tax_only = True
     config.tax.use_bank = False
-    config.tax.tax_discretized = True
-    config.tax.division_value = 0.1
+    config.tax.tax_discretized = False
     config.tax.max_deficit = 0
     config.tax.budget_ratio_scale = 1.0
     config.tax.return_agent_actions = True
@@ -56,8 +55,8 @@ def get_config():
     config.tax.with_extra_infos = True
 
     config.main = ConfigDict()
-    config.main.dir_name = 'er_n2_tax_only_discrete_count'
-    config.main.exp_name = 'er_n2_tax_only_discrete'
+    config.main.dir_name = 'er_n3_tax_only_continuous_count'
+    config.main.exp_name = 'escape_room_n3/er_n3_tax_only_continuous'
     config.main.max_to_keep = 100
     config.main.model_name = 'model.ckpt'
     config.main.save_period = 100000
