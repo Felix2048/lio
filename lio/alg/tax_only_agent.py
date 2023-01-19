@@ -12,9 +12,10 @@ class TaxOnlyAgent(object):
         self.l_action = n_agents
 
         self.tax_discretized = configs.tax.tax_discretized if 'tax_discretized' in configs.tax.keys() else False
-        self.range_min, self.range_max = -1.0, 1.0
+        self.range_min = configs.tax.range_min if 'division_value' in configs.tax.keys() else -10
+        self.range_max = configs.tax.range_max if 'division_value' in configs.tax.keys() else 10
         if self.tax_discretized:
-            self.division_value = configs.tax.division_value if 'division_value' in configs.tax.keys() else 0.1
+            self.division_value = configs.tax.division_value if 'division_value' in configs.tax.keys() else 5
             self.n_calibration = int(1 + (self.range_max - self.range_min) / self.division_value)
             self.action_to_tax = np.linspace(self.range_min, self.range_max, self.n_calibration, dtype=np.float32)
 
@@ -133,7 +134,7 @@ class TaxOnlyAgent(object):
         else:
             action = action[0].reshape(self.n_agents,)
             assert action.shape == (self.l_action,)
-            shaping = action
+            shaping = action * self.range_max
         new_rewards = reward_vector + shaping
 
         if with_extra_infos:
