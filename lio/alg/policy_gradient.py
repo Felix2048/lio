@@ -78,7 +78,7 @@ class PolicyGradient(object):
         self.policy_opt = tf.train.GradientDescentOptimizer(self.lr_actor)
         self.policy_op = self.policy_opt.apply_gradients(grads_and_vars)
 
-    def train(self, sess, buf, epsilon):
+    def train(self, sess, buf, epsilon, check_numerics=False, verify_gpu=False):
 
         n_steps = len(buf.obs)
         actions_1hot = util.process_actions(buf.action, self.l_action)
@@ -89,6 +89,8 @@ class PolicyGradient(object):
                 self.ones: ones,
                 self.epsilon: epsilon}
 
+        if check_numerics:
+            return util.checked_policy_update(sess, self, feed, verify_gpu=verify_gpu)
         _ = sess.run(self.policy_op, feed_dict=feed)
 
         

@@ -109,13 +109,13 @@ class EscapeRoom(gym.Env):
             'curr_obs': curr_obs
         }
         if self.return_agent_actions:
-            if actions:
+            if actions is not None:
                 assert len(actions) == self.tax_l_obs["agent_actions"], f'get_tax_planner_obs(): invalid action shape {actions.shape if hasattr(actions, "shape") else len(actions)}, {self.tax_l_obs["agent_actions"]}'
                 tax_obs["agent_actions"] = np.array(actions)
             else:
                 tax_obs["agent_actions"] = np.zeros(self.tax_l_obs["agent_actions"])
         if self.return_agent_rewards:
-            if rewards:
+            if rewards is not None:
                 assert len(rewards) == self.tax_l_obs["agent_rewards"], f'get_tax_planner_obs(): invalid rewards shape {rewards.shape if hasattr(actions, "shape") else  len(rewards)}, {self.tax_l_obs["agent_rewards"]}'
                 tax_obs["agent_rewards"] = np.array(rewards).astype(np.float32)
             else:
@@ -159,7 +159,7 @@ class EscapeRoom(gym.Env):
         self.steps += 1
         self.state = [actor.position for actor in self.actors]
         list_obs_next = self.get_obs()
-        tax_planner_obs = self.get_tax_planner_obs()
+        tax_planner_obs = self.get_tax_planner_obs(actions=action, rewards=rewards_env)
 
         door_open = self.get_door_status(action)
         if door_open and 2 in self.state:

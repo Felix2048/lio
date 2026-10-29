@@ -1,6 +1,8 @@
 import numpy as np
 import tensorflow.compat.v1 as tf
 
+from lio.utils import util
+
 
 class TaxAgent(object):
 
@@ -93,7 +95,7 @@ class TaxAgent(object):
         self.policy_opt = tf.train.GradientDescentOptimizer(self.lr_actor)
         self.policy_op = self.policy_opt.apply_gradients(grads_and_vars)
 
-    def train(self, sess, buf):
+    def train(self, sess, buf, check_numerics=False, verify_gpu=False):
         obs_inputs = {self.obs[obs_name]: obs_input for obs_name, obs_input in buf.tax_planner_obs.items()}
         # action_inputs = {self.tax_planner_actions[action_name]: action_input for action_name, action_input in buf.tax_planner_action.items()}
         n_steps = buf.n_steps
@@ -112,6 +114,8 @@ class TaxAgent(object):
         if self.use_bank:
             feed[self.shaped_reward_sums] = np.array(buf.shaped_reward_sums).astype(np.float32)
 
+        if check_numerics:
+            return util.checked_policy_update(sess, self, feed, verify_gpu=verify_gpu)
         _ = sess.run(self.policy_op, feed_dict=feed)
 
     def act(self, tax_planner_actions, reward_vector, bank=0, with_extra_infos=False):
