@@ -1,0 +1,10 @@
+# Python 3.9 / Windows
+tensorflow==2.10.1
+tensorboard==2.10.1
+keras==2.10.0
+numpy==1.23.0
+protobuf==3.19.6
+scipy==1.13.1
+gym==0.10.9
+pyglet<2
+tqdm==4.70.1

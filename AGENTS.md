@@ -1,5 +1,7 @@
 # Repository guidance
 
+- Current update (2026-10-29): `BUGFIXES.md` distinguishes completed fixes from unresolved issues. `README.md` and root `requirements.txt` are current usage/install entry points. Preserve this repository's full experiments when syncing fixes from the separate LOPT package.
+
 ## Context and current priority
 
 - Latest launcher preference (2026-10-29): use existing `lio/alg/train_tax.py` with explicit CLI parameters; full commands and TensorBoard are in `../docs/run_commands/escape_room.md`. Do not create tools/train entries or .ps1 launchers. Earlier `tools/train_escape_room.py` was removed after its CLI/runtime checks were integrated into the existing train module.

@@ -27,7 +27,7 @@ class EscapeRoom(gym.Env):
     def __init__(self, max_steps, n_agents=2, reward_value=2.0,
                  incentivization_inside_env=True,
                  fixed_episode_length=True, observe_given=True,
-                 reward_coeff=1.0):
+                 reward_coeff=1.0, randomize=False):
         """Many repeated variable names to support both LOLA and LIO."""
         self.name = 'er'
         # Only 2 and 3-player are supported 
@@ -35,6 +35,7 @@ class EscapeRoom(gym.Env):
         self.incentivization_inside_env = incentivization_inside_env
         self.max_steps = max_steps
         self.n_agents = n_agents
+        self.randomize = randomize
         # Only support (N=2,M=1) and (N=3,M=2)
         self.min_at_lever = 1 if self.n_agents==2 else 2
         self.NUM_AGENTS = self.n_agents
@@ -138,7 +139,7 @@ class EscapeRoom(gym.Env):
 
     def reset(self, tested=False):
         self.solved = False
-        randomize = (self.n_agents == 3) if not tested else False
+        randomize = self.randomize and not tested
         for actor in self.actors:
             actor.reset(randomize)
         self.state = [actor.position for actor in self.actors]

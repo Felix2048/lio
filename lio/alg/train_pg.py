@@ -81,7 +81,8 @@ def train_function(config):
                     incentivization_inside_env=allow_giving,
                     fixed_episode_length=False,
                     observe_given=observe_given,
-                    reward_coeff=config.env.reward_coeff)
+                    reward_coeff=config.env.reward_coeff,
+                    randomize=config.env.get('randomize', False))
         dim_obs = env.l_obs
         l_action_for_r = None
     elif config.env.name == 'ssd':

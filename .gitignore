@@ -5,3 +5,6 @@ minilab/
 *.pyc
 *.egg-info/
 *pycache*
+# Runtime outputs from this source package
+results/
+logs/

@@ -1,57 +1,81 @@
-# Learning to Incentivize Others
+# Escape Room
 
-This is the code for experiments in the paper [Learning to Incentivize Other Learning Agents](https://arxiv.org/abs/2006.06051). Baselines are included.
+基于 [Learning to Incentivize Others](https://github.com/011235813/lio)，加入 LOPT 的 Escape Room 训练代码。
 
+以下命令在 PowerShell 中从 `LOPT` 根目录执行。
 
-## Setup
+## 环境
 
-- Python 3.6
-- Tensorflow >= 1.12
-- OpenAI Gym == 0.10.9
-- Clone and `pip install` [Sequential Social Dilemma](https://github.com/011235813/sequential_social_dilemma_games), which is a fork from the [original](https://github.com/eugenevinitsky/sequential_social_dilemma_games) open-source implementation.
-- Clone and `pip install` [LOLA](https://github.com/alshedivat/lola) if you wish to run this baseline.
-- Clone this repository and run `$ pip install -e .` from the root.
+```powershell
+conda create -n lio python=3.9.21 pip=23.0.1 setuptools=65.6.3 wheel=0.38.4
+conda activate lio
+python -m pip install --no-user -r ./lio/requirements.txt
+```
 
+GPU 使用 TensorFlow 2.10.1、CUDA 11.2 和 cuDNN 8.1。
 
-## Navigation
+## 运行
 
-* `alg/` - Implementation of LIO and PG/AC baselines
-* `env/` - Implementation of the Escape Room game and wrappers around the SSD environment.
-* `results/` - Results of training will be stored in subfolders here. Each independent training run will create a subfolder that contains the final Tensorflow model, and reward log files. For example, 5 parallel independent training runs would create `results/cleanup/10x10_lio_0`,...,`results/cleanup/10x10_lio_4` (depending on configurable strings in config files).
-* `utils/` - Utility methods
+```powershell
+conda activate lio
+New-Item -ItemType Directory -Force -Path ./logs | Out-Null
+$env:CUDA_VISIBLE_DEVICES = '0'
+```
 
+### N=2，M=1
 
-## Examples
+```powershell
+python -u -I -B .\lio\lio\alg\train_tax.py er `
+    --n_agents 2 `
+    --exp_name escape_room `
+    --device cuda `
+    --episodes 50000 `
+    --eval_period 100 `
+    --n_eval 10 `
+    --seed 12340 `
+    --lr_actor 0.001 `
+    --loss_penalty_term_weight 0.95 `
+    --gamma 0.99 `
+    --epsilon_start 0.5 `
+    --epsilon_end 0.05 `
+    --epsilon_div 100 `
+    --entropy_coeff 0.01 `
+    --use_tax `
+    --use_bank `
+    --return_agent_actions `
+    --return_agent_rewards `
+    --summarize `
+    --verify_gpu `
+    2>&1 | ForEach-Object { $_.ToString() } | Tee-Object -FilePath .\logs\escape-room-n2-console.log
+```
 
-### Train LIO on Escape Room
+### N=3，M=2
 
-* Set config values in `alg/config_room_lio.py`
-* `cd` into the `alg` folder
-* Execute training script `$ python train_multiprocess.py lio er`. Default settings conduct 5 parallel runs with different seeds.
-* For a single run, execute `$ python train_lio.py er`.
+```powershell
+python -u -I -B .\lio\lio\alg\train_tax.py er `
+    --n_agents 3 `
+    --exp_name escape_room `
+    --device cuda `
+    --episodes 50000 `
+    --eval_period 100 `
+    --n_eval 10 `
+    --seed 12340 `
+    --lr_actor 0.001 `
+    --loss_penalty_term_weight 0.95 `
+    --gamma 0.99 `
+    --epsilon_start 0.5 `
+    --epsilon_end 0.05 `
+    --epsilon_div 100 `
+    --entropy_coeff 0.01 `
+    --use_tax `
+    --use_bank `
+    --return_agent_actions `
+    --return_agent_rewards `
+    --summarize `
+    --verify_gpu `
+    2>&1 | ForEach-Object { $_.ToString() } | Tee-Object -FilePath .\logs\escape-room-n3-console.log
+```
 
-### Train LIO on Cleanup
+通过 `--seed` 设置随机种子，`--exp_name` 设置实验名。终端日志保存在 `logs/`，训练结果保存在 `lio/lio/results/`。
 
-* Set config values in `alg/config_ssd_lio.py`
-* `cd` into the `alg` folder
-* Execute training script `$ python train_multiprocess.py lio ssd`.
-* For a single run, execute `$ python train_ssd.py`.
-
-## Citation
-
-<pre>
-@article{yang2020learning,
-  title={Learning to incentivize other learning agents},
-  author={Yang, Jiachen and Li, Ang and Farajtabar, Mehrdad and Sunehag, Peter and Hughes, Edward and Zha, Hongyuan},
-  journal={Advances in Neural Information Processing Systems},
-  volume={33},
-  pages={15208--15219},
-  year={2020}
-}
-</pre>
-
-## License
-
-See [LICENSE](LICENSE).
-
-SPDX-License-Identifier: MIT
+许可证见 [LICENSE](LICENSE)。

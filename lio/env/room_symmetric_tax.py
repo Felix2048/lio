@@ -34,6 +34,7 @@ class EscapeRoom(gym.Env):
         assert n_agents == 2 or n_agents == 3
         self.max_steps = max_steps
         self.n_agents = n_agents
+        self.randomize = configs.env.get('randomize', False)
         # Only support (N=2,M=1) and (N=3,M=2)
         self.min_at_lever = 1 if self.n_agents==2 else 2
         self.NUM_AGENTS = self.n_agents
@@ -132,7 +133,7 @@ class EscapeRoom(gym.Env):
 
     def reset(self, tested=False):
         self.solved = False
-        randomize = (self.n_agents == 3) if not tested else False
+        randomize = self.randomize and not tested
         for actor in self.actors:
             actor.reset(randomize)
         self.state = [actor.position for actor in self.actors]
