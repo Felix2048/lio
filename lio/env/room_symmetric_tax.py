@@ -181,13 +181,21 @@ class EscapeRoom(gym.Env):
         # compute tax and subsidy
         if self.use_bank:
             rewards, tax_planner_reward, self.bank, shaping, extra_infos = self.tax_planner.act(tax_planner_actions, rewards_env, bank=self.bank, with_extra_infos=self.with_extra_infos)
-            shaped_reward_sum = shaping.sum()
             if done:
                 # subsidy all the reward in the bank to all agents averagely
+                refund = self.bank / self.n_agents
                 for i in range(len(rewards)):
-                    rewards[i] += self.bank / self.n_agents
+                    rewards[i] += refund
+                if extra_infos is not None:
+                    extra_infos['subsidy'] = (np.asarray(extra_infos['subsidy']) + refund).tolist()
+                    extra_infos['shaping'] = (np.asarray(extra_infos['shaping']) + refund).tolist()
+                    extra_infos['budget'] += self.bank
+                    extra_infos['terminal_refund'] = self.bank
+                self.bank = 0.
+            shaped_reward_sum = (rewards - rewards_env).sum()
         else:
             rewards, tax_planner_reward, _, _, extra_infos = self.tax_planner.act(tax_planner_actions, rewards_env, with_extra_infos=self.with_extra_infos)
+            shaped_reward_sum = 0.
 
         if self.with_extra_infos:
             infos['extra_infos'] = extra_infos

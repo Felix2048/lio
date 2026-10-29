@@ -50,6 +50,8 @@ def get_config():
     config.tax.return_agent_actions = True
     config.tax.return_agent_rewards = True
     config.tax.loss_penalty_term_weight = 0.95
+    config.tax.planner_action_std = 1.0
+    config.tax.planner_update_period = 10
     config.tax.with_extra_infos = True
 
     config.main = ConfigDict()

@@ -599,7 +599,7 @@ def test_room_symmetric_tax_planner(n_eval, env, sess, list_agents):
 
             list_obs_next, tax_planner_obs, rewards_env, done, infos = env.step(list_actions)
             tax_planner_obs = {obs_name: obs_input.reshape(1, -1) for obs_name, obs_input in tax_planner_obs.items()}
-            tax_planner_actions = tax_planner.run_actor(tax_planner_obs, sess)
+            tax_planner_actions = tax_planner.run_actor(tax_planner_obs, sess, deterministic=True)
             rewards, tax_planner_reward, shaped_reward_sum, infos = env.step_tax_planner(tax_planner_actions, rewards_env, done, infos)
 
             if env.with_extra_infos:

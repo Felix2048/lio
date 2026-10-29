@@ -1,5 +1,7 @@
 # Repository guidance
 
+- Current planner update (2026-10-29): Escape Room uses cached logistic-normal sampled actions and on-policy learning windows. Workers update each episode; the planner updates every `tax.planner_update_period` episodes (default 10), including a final partial window. Its training target uses later episodes after worker learning, excluding raw rewards of the current physical episode. `tax.planner_action_std=1.0` and the window default are implementation choices, not paper-specified settings. Terminal bank refunds are included in costs and actual subsidy/shaping metrics. See `BUGFIXES.md` and `tests/test_tax_planner_policy.py`; full convergence remains to be checked. Do not apply this schedule to Cleanup without a separate user instruction.
+
 - Current update (2026-10-29): `BUGFIXES.md` distinguishes completed fixes from unresolved issues. `README.md` and root `requirements.txt` are current usage/install entry points. Preserve this repository's full experiments when syncing fixes from the separate LOPT package.
 
 ## Context and current priority
@@ -30,7 +32,7 @@ Paths below are relative to this repository root, which contains another `lio/` 
 - `lio/alg/tax_agent.py`: LOPT tax/subsidy/budget networks, reward shaping, policy loss, bank penalty, and planner optimization.
 - `lio/alg/policy_gradient.py`: ordinary worker policy and optimizer used by LOPT. This is a required component, not merely a comparison training entry point.
 - `lio/alg/networks.py`: shared policy network builders, including `actor_mlp` for Escape Room.
-- `lio/alg/train_tax.py`: `train_function(config, show_progress=False)`, `run_episode`, `Buffer`, and `TaxPlannerBuffer`; updates all workers and then the planner once per episode.
+- `lio/alg/train_tax.py`: `train_function(config, show_progress=False)`, `run_episode`, `Buffer`, and `TaxPlannerBuffer`; updates workers each episode and the planner after an on-policy multi-episode window.
 - `lio/alg/config_room_tax.py`: default configuration loaded by the current single-run and multiprocess tax entry points; currently N=3.
 - `lio/alg/er_configs/config_room_tax_n2.py` and `config_room_tax_n3.py`: explicit two- and three-worker experiment settings.
 - `lio/alg/evaluate.py`: shared evaluation helpers; LOPT uses `test_room_symmetric_tax_planner`.

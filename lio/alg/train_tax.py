@@ -72,6 +72,9 @@ def train_function(config, show_progress=False):
     n_episodes = config.alg.n_episodes
     n_eval = config.alg.n_eval
     period = config.alg.period
+    planner_update_period = config.tax.get('planner_update_period', 10)
+    if not isinstance(planner_update_period, int) or planner_update_period < 2:
+        raise ValueError('planner_update_period must be an integer of at least 2')
 
     reward_type = config.pg.reward_type
     assert reward_type == 'none'
@@ -141,6 +144,9 @@ def train_function(config, show_progress=False):
     step = 0
     step_train = 0
     t_start = time.time()
+    planner_window = TaxPlannerBuffer()
+    planner_updates = 0
+    planner_gpu_verified = False
 
     if show_progress:
         from tqdm.auto import tqdm
@@ -160,18 +166,34 @@ def train_function(config, show_progress=False):
                     sess, list_buffers[idx], epsilon, check_numerics=True, verify_gpu=verify_gpu)
             else:
                 agent.train(sess, list_buffers[idx], epsilon)
-        # train tax planner
-        if check_numerics or verify_gpu:
-            diagnostics[tax_planner.agent_name] = tax_planner.train(
-                sess, tax_planner_buffer, check_numerics=True, verify_gpu=verify_gpu)
+        # Keep the planner on-policy over a learning window: workers update
+        # each episode while the planner stays fixed. Later original welfare
+        # can then credit earlier subsidies through those worker updates.
+        planner_window.add_episode(tax_planner_buffer)
+        update_planner = (len(planner_window.episode_ends) >= planner_update_period
+                          or idx_episode == n_episodes)
+        verify_planner_gpu = (config.main.get('verify_gpu', False)
+                              and not planner_gpu_verified and update_planner)
+        if update_planner:
+            window_episodes = len(planner_window.episode_ends)
+            if check_numerics or verify_planner_gpu:
+                diagnostics[tax_planner.agent_name] = tax_planner.train(
+                    sess, planner_window, check_numerics=True, verify_gpu=verify_planner_gpu)
+            else:
+                tax_planner.train(sess, planner_window)
+            planner_updates += 1
+            planner_gpu_verified = planner_gpu_verified or verify_planner_gpu
+            logger.debug('planner_update episode=%d window_episodes=%d window_steps=%d',
+                        idx_episode, window_episodes, planner_window.n_steps)
+            planner_window.reset()
+        if check_numerics or verify_gpu or verify_planner_gpu:
             logger.debug('tax_update_diagnostics %s', json.dumps({
                 'episode': idx_episode, 'agents': diagnostics,
             }, sort_keys=True))
-        else:
-            tax_planner.train(sess, tax_planner_buffer)
-        if verify_gpu:
+        if verify_gpu or verify_planner_gpu:
             logger.info('cuda_training_verified %s', json.dumps(diagnostics, sort_keys=True))
-        logger.debug('tax_update episode=%d workers=%d planner=1', idx_episode, env.n_agents)
+        logger.debug('tax_update episode=%d workers=%d planner=%d',
+                     idx_episode, env.n_agents, int(update_planner))
         step_train += 1
         social_welfare = sum(tax_planner_buffer.tax_planner_reward)
         if writer is not None:
@@ -180,7 +202,10 @@ def train_function(config, show_progress=False):
                 'train/episode_length': len(list_buffers[0].obs),
                 'train/environment_steps': step,
                 'train/epsilon': epsilon,
+                'train/planner_updates': planner_updates,
             }
+            if update_planner:
+                metrics['train/planner_window_episodes'] = window_episodes
             for idx, buf in enumerate(list_buffers):
                 metrics['train/agent_%d/extrinsic_reward' % idx] = sum(buf.extrinsic_reward)
                 metrics['train/agent_%d/shaped_reward' % idx] = sum(buf.reward)
@@ -327,6 +352,18 @@ class TaxPlannerBuffer(object):
         self.agent_rewards = []
         self.infos = []
         self.n_steps = 0
+        self.episode_ends = []
+
+    def add_episode(self, episode):
+        for t in range(episode.n_steps):
+            transition = [
+                {k: v[t] for k, v in episode.tax_planner_obs.items()},
+                {k: v[t] for k, v in episode.tax_planner_action.items()},
+                episode.tax_planner_reward[t], episode.shaped_reward_sums[t],
+                episode.agent_rewards[t],
+            ]
+            self.add(transition)
+        self.episode_ends.append(self.n_steps)
 
     def add(self, tax_planner_transition, infos=None):
         self.n_steps += 1
@@ -360,6 +397,8 @@ def main():
     parser.add_argument('--dir_name')
     parser.add_argument('--lr_actor', type=float)
     parser.add_argument('--loss_penalty_term_weight', type=float)
+    parser.add_argument('--planner_action_std', type=float)
+    parser.add_argument('--planner_update_period', type=int)
     parser.add_argument('--entropy_coeff', type=float)
     parser.add_argument('--epsilon_start', type=float)
     parser.add_argument('--epsilon_end', type=float)
@@ -390,7 +429,7 @@ def main():
     for key in ('lr_actor', 'entropy_coeff', 'epsilon_start', 'epsilon_end', 'epsilon_div', 'gamma'):
         if getattr(args, key) is not None:
             config.pg[key] = getattr(args, key)
-    for key in ('loss_penalty_term_weight', 'use_tax', 'use_bank',
+    for key in ('loss_penalty_term_weight', 'planner_action_std', 'planner_update_period', 'use_tax', 'use_bank',
                 'return_agent_actions', 'return_agent_rewards'):
         if getattr(args, key) is not None:
             config.tax[key] = getattr(args, key)
